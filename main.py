@@ -1,4 +1,7 @@
 import toga
+import time
+import threading
+
 from toga.style import Pack
 from toga.style.pack import *
 
@@ -14,8 +17,12 @@ class BTC(toga.App):
         self.title = title
         self.size = SIZE
 
+        self.variables()
         self.create_components()
-        self.update_values()
+        self.start_clock()
+
+    def variables(self):
+        self.v_bid = ''
 
     def create_components(self):
         self.create_image()
@@ -51,7 +58,7 @@ class BTC(toga.App):
         self.ask = toga.Label('Ask', style=style)
         self.low = toga.Label('Low', style=style)
         self.high = toga.Label('High', style=style)
-        self.volume_24 = toga.Label('24 H Volume', style=style)
+        self.volume_24 = toga.Label('24 H Change', style=style)
         self.volume = toga.Label('Volume', style=style)
 
         self.volume_24.style.update(padding_left=10)
@@ -60,12 +67,12 @@ class BTC(toga.App):
     def create_price_elements_value_label(self):
         style = Pack(color='BLACK', alignment=CENTER, font_size=18, padding_bottom=PADDING_BOTTOM_VAL)
 
-        self.bid_val = toga.Label('$169,003.39', style=style)
-        self.ask_val = toga.Label('$169,899.82', style=style)
-        self.low_val = toga.Label('$161,500.00', style=style)
-        self.high_val = toga.Label('$170,960.87', style=style)
-        self.volume_24_val = toga.Label('207.76', style=style)
-        self.volume_val = toga.Label('0.53%', style=style)
+        self.bid_val = toga.Label(self.v_bid, style=style)
+        self.ask_val = toga.Label('', style=style)
+        self.low_val = toga.Label('', style=style)
+        self.high_val = toga.Label('', style=style)
+        self.volume_24_val = toga.Label('', style=style)
+        self.volume_val = toga.Label('', style=style)
 
         self.volume_24_val.style.update(padding_left=23)
         self.volume_val.style.update(padding_left=30)
@@ -73,12 +80,12 @@ class BTC(toga.App):
     def startup(self):
         self.main_window = toga.MainWindow('main', title=self.title, size=self.size)
 
-        top_container = toga.Box(children=[self.logo, self.price, self.currency],
+        self.top_container = toga.Box(children=[self.logo, self.price, self.currency],
             style=Pack(
                 direction=COLUMN, alignment=CENTER
         ))
 
-        bottom_container = toga.SplitContainer()
+        self.bottom_container = toga.SplitContainer()
         right = toga.Box(
             children=[self.bid, self.bid_val, self.low, self.low_val, self.volume_24, self.volume_24_val],
             style=Pack(
@@ -93,12 +100,12 @@ class BTC(toga.App):
                 padding_left=40, padding_top=20
             )
         )
-        bottom_container.content = [right, left]
+        self.bottom_container.content = [right, left]
 
-        split = toga.SplitContainer(direction=toga.SplitContainer.HORIZONTAL)
-        split.content = [top_container, bottom_container]
+        self.split = toga.SplitContainer(direction=toga.SplitContainer.HORIZONTAL)
+        self.split.content = [self.top_container, self.bottom_container]
 
-        self.main_window.content = split
+        self.main_window.content = self.split
         self.main_window.show()
 
     def update_values(self):
@@ -117,6 +124,14 @@ class BTC(toga.App):
 
     def dolar_format(self, val):
         return '${:3,.2f}'.format(val)
+
+    def __clock(self):
+        self.update_values()
+
+    def start_clock(self):
+        p = threading.Thread(target=self.__clock)
+        p.start()
+        p.join()
 
 if __name__ == '__main__':
     btc = BTC('com.codigofacilito.btc', 'BTC price')
