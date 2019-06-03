@@ -110,7 +110,6 @@ class BTC(toga.App):
 
     def update_values(self):
         currency = get_cryptocurrency_price()
-        print(currency)
 
         self.bid_val.text = self.dolar_format(self.get_price(currency, 'bid'))
         self.low_val.text = self.dolar_format(self.get_price(currency, 'low'))
@@ -131,8 +130,8 @@ class BTC(toga.App):
     def start_clock(self):
         p = threading.Thread(target=self.__clock)
         p.start()
-        p.join()
 
 if __name__ == '__main__':
     btc = BTC('com.codigofacilito.btc', 'BTC price')
     btc.main_loop()
+    print("Aquí vamo")
